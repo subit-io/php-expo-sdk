@@ -1,0 +1,40 @@
+{
+    "name": "subit/php-expo-sdk",
+    "description": "Expo SDK written in PHP",
+    "homepage": "https://github.com/subit-io/php-expo-sdk",
+    "license": "MIT",
+    "require": {
+        "guzzlehttp/guzzle": "^6.3",
+      "ext-json": "*"
+    },
+    "authors": [
+        {
+            "name": "Alexander Wallin Dradrach",
+            "email": "wallindradrach@outlook.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Emil Büchler Seier Petersen",
+            "email": "emil@ebsp.dk",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Subit\\ExpoSdk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Subit\\ExpoSdk\\Tests\\": "tests/"
+        }
+    },
+    "prefer-stable": true,
+    "require-dev": {
+        "phpunit/phpunit": "^7.4",
+        "orchestra/testbench": "^3.8"
+    },
+    "scripts": {
+    	"coverage": "phpunit --coverage-html ./docs/coverage"
+    }
+}
