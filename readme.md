@@ -1,7 +1,9 @@
 # Exponent Push Notification Server SDK
 Server-side PHP library for working with Expo push notifications
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/subit/php-expo-sdk.svg?style=flat-square)](https://packagist.org/packages/subit/php-expo-sdk)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Total Downloads](https://img.shields.io/packagist/dt/subit/php-expo-sdk.svg?style=flat-square)](https://packagist.org/packages/subit/php-expo-sdk)
 
 ## Contents
 
