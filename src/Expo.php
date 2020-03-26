@@ -65,7 +65,7 @@ class Expo
 
         $responseBody = json_decode($response->getBody()->__toString());
 
-        if(key_exists('errors', $responseBody)) {
+        if(property_exists($responseBody, 'errors')) {
             throw new ExpoApiEndpointException($responseBody->errors);
         }
 
@@ -106,7 +106,7 @@ class Expo
 
         $responseBody = json_decode($response->getBody()->__toString());
 
-        if(key_exists('errors', $responseBody)) {
+        if(property_exists($responseBody, 'errors')) {
             throw new ExpoApiEndpointException($responseBody->errors);
         }
 
