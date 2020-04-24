@@ -37,7 +37,7 @@ class ExpoMessageReceipt
         return $this;
     }
 
-    public function details(string $value)
+    public function details($value)
     {
         $this->details = $value;
 
