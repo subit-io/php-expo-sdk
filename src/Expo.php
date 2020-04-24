@@ -169,7 +169,7 @@ class Expo
             }
 
             if (property_exists($rawReceipt, 'details')) {
-                $receipt->details(json_decode($rawReceipt->details));
+                $receipt->details($rawReceipt->details);
             }
 
             array_push($receipts, $receipt);
