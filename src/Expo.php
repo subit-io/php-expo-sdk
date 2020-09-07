@@ -48,13 +48,16 @@ class Expo
         }
 
         $requestBody = [];
+        $tickets = [];
 
+        /* @var ExpoMessage $expoMessage */
         foreach ($expoMessages as $expoMessage) {
-            $expoMessage = $expoMessage->toArray();
-            if (!array_key_exists('to', $expoMessage)) {
+            $arrayExpoMessage = $expoMessage->toArray();
+            if (!array_key_exists('to', $arrayExpoMessage)) {
                 throw new MissingExponentTokenException();
             }
-            array_push($requestBody, $expoMessage);
+            $requestBody[] = $arrayExpoMessage;
+            $tickets[] = (new ExpoMessageTicket)->token($expoMessage->getTo());
         }
 
         $requestBody = json_encode($requestBody);
@@ -69,7 +72,7 @@ class Expo
             throw new ExpoApiEndpointException($responseBody->errors);
         }
 
-        return $this->buildTickets($responseBody->data);
+        return $this->buildTickets($responseBody->data, $tickets);
     }
 
     public function getPushNotificationReceipt($ticketId) : ExpoMessageReceipt
@@ -123,13 +126,12 @@ class Expo
         return preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $id);
     }
 
-    private function buildTickets($rawTickets)
-    {;
-        $tickets = [];
+    private function buildTickets($rawTickets, $tickets)
+    {
+        $counter = 0;
 
         foreach ($rawTickets as $rawTicket) {
-
-            $ticket = new ExpoMessageTicket();
+            $ticket = $tickets[$counter];
 
             if (property_exists($rawTicket, 'id')) {
                 $ticket->id($rawTicket->id);
@@ -145,14 +147,12 @@ class Expo
             if (property_exists($rawTicket, 'details')) {
                 $ticket->details(json_encode($rawTicket->details));
             }
-
-            array_push($tickets, $ticket);
+            $counter++;
         }
-
         return $tickets;
     }
 
-    private function buildReceipts($rawReceipts)
+    private function buildReceipts($rawReceipts) : array
     {
         $receipts = [];
 
@@ -172,7 +172,7 @@ class Expo
                 $receipt->details($rawReceipt->details);
             }
 
-            array_push($receipts, $receipt);
+            $receipts[] = $receipt;
         }
 
         return $receipts;
@@ -199,13 +199,13 @@ class Expo
             if ($pointer + $batchSize <= $chunkableSize) {
 
                 $slice = array_slice($chunkable, $pointer, $batchSize);
-                array_push($chunks, $slice);
+                $chunks[] = $slice;
                 $pointer += $batchSize;
 
             } else {
 
                 $slice = array_slice($chunkable, $pointer, $chunkableSize);
-                array_push($chunks, $slice);
+                $chunks[] = $slice;
                 break;
             }
 

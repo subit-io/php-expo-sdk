@@ -9,6 +9,7 @@ class ExpoMessageTicket
     protected $status;
     protected $message;
     protected $details;
+    protected $token;
 
     public static function create()
     {
@@ -39,6 +40,13 @@ class ExpoMessageTicket
     public function details(string $value)
     {
         $this->details = $value;
+
+        return $this;
+    }
+
+    public function token(string $value)
+    {
+        $this->token = $value;
 
         return $this;
     }
@@ -84,5 +92,8 @@ class ExpoMessageTicket
         return $this->details;
     }
 
-
+    public function getToken()
+    {
+        return $this->token;
+    }
 }

@@ -41,7 +41,7 @@ class ExpoTest extends TestCase
             ->channelId('ID')
             ->jsonData('{}');
 
-        $expoTicket = ExpoMessageTicket::create()
+        $expectedTicket = ExpoMessageTicket::create()
             ->id('bcc7df52-6148-40dd-8647-9a888755c2eb')
             ->status('ok');
 
@@ -75,15 +75,17 @@ class ExpoTest extends TestCase
             ->once()
             ->andReturn($responseBody);
 
-        $result = $expo->sendPushNotification($expoMessage);
+        $actualTicket = $expo->sendPushNotification($expoMessage);
 
-        $expoTicket = $expoTicket->toArray();
-        $actual = $result->toArray();
+        $this->assertSame($expoMessage->getTo(), $actualTicket->getToken());
 
-        $expoTicketStatus = $expoTicket['status'];
-        $actualStatus = $actual['status'];
+        $expectedTicketArray = $expectedTicket->toArray();
+        $actualTicketArray = $actualTicket->toArray();
 
-        $this->assertEquals('bcc7df52-6148-40dd-8647-9a888755c2eb', $expoTicket['id']);
+        $expoTicketStatus = $expectedTicketArray['status'];
+        $actualStatus = $actualTicketArray['status'];
+
+        $this->assertEquals('bcc7df52-6148-40dd-8647-9a888755c2eb', $expectedTicketArray['id']);
         $this->assertEquals($expoTicketStatus, $actualStatus);
     }
 
@@ -192,9 +194,16 @@ class ExpoTest extends TestCase
             ->andReturn($responseBody);
 
         $result = $expo->sendPushNotifications([$validExpoMessage, $invalidExpoMessage]);
+        $this->assertCount(2, $result);
 
-        $validResponse = $result[0]->toArray();
-        $invalidResponse = $result[1]->toArray();
+        $validTicket = $result[0];
+        $invalidTicket = $result[1];
+
+        $this->assertSame($validExpoMessage->getTo(), $validTicket->getToken());
+        $this->assertSame($invalidExpoMessage->getTo(), $invalidTicket->getToken());
+
+        $validResponse = $validTicket->toArray();
+        $invalidResponse = $invalidTicket->toArray();
 
         $this->assertArrayHasKey('id', $validResponse);
         $this->assertEquals('ok', $validResponse['status']);
@@ -248,9 +257,10 @@ class ExpoTest extends TestCase
 
 
         $receipts = $expo->getPushNotificationReceipts($tickets);
+        $this->assertCount(2, $receipts);
         $receipts = [$receipts[0]->toArray(), $receipts[1]->toArray()];
 
-        for ($i = 0; $i < count($tickets); $i++)
+        for ($i = 0, $iMax = count($tickets); $i < $iMax; $i++)
         {
             $expectedId = $tickets[$i];
             $actualId = $receipts[$i]['id'];
