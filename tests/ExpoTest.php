@@ -225,7 +225,7 @@ class ExpoTest extends TestCase
 
         $expo = new Expo($client);
 
-        $tickets = ['1baa8861-15e6-4202-a1b4-31119319e1bf', 'c25ed154-b214-46bc-8212-9fec4c53220f'];
+        $tickets = [$ticketA = '1baa8861-15e6-4202-a1b4-31119319e1bf', $ticketB = 'c25ed154-b214-46bc-8212-9fec4c53220f'];
 
         $client
             ->shouldReceive('request')
@@ -256,21 +256,18 @@ class ExpoTest extends TestCase
             ->andReturn('{"data":{"1baa8861-15e6-4202-a1b4-31119319e1bf":{"status":"ok"},"c25ed154-b214-46bc-8212-9fec4c53220f":{"status":"ok"}}}');
 
 
-        $receipts = $expo->getPushNotificationReceipts($tickets);
-        $this->assertCount(2, $receipts);
-        $receipts = [$receipts[0]->toArray(), $receipts[1]->toArray()];
+        $returnedReceipts = $expo->getPushNotificationReceipts($tickets);
+        $this->assertCount(2, $returnedReceipts);
 
-        for ($i = 0, $iMax = count($tickets); $i < $iMax; $i++)
-        {
-            $expectedId = $tickets[$i];
-            $actualId = $receipts[$i]['id'];
+        $this->assertArrayHasKey($ticketA, $returnedReceipts);
+        $this->assertArrayHasKey($ticketB, $returnedReceipts);
 
-            $expectedStatus = 'ok';
-            $actualStatus = $receipts[$i]['status'];
+        $receiptA = $returnedReceipts[$ticketA];
+        $receiptB = $returnedReceipts[$ticketB];
 
-            $this->assertEquals($expectedId, $actualId);
-            $this->assertEquals($expectedStatus, $actualStatus);
-        }
+        $expectedStatus = 'ok';
+        $this->assertSame($expectedStatus, $receiptA->getStatus());
+        $this->assertSame($expectedStatus, $receiptB->getStatus());
     }
 
     public function testGetPushNotificationReceipt()

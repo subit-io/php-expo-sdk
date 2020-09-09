@@ -83,7 +83,7 @@ class Expo
             throw new WrongReceiptIdException();
         }
 
-        return $receiptInArray[0];
+        return current($receiptInArray);
     }
 
     public function getPushNotificationReceipts(array $ticketIds)
@@ -172,7 +172,7 @@ class Expo
                 $receipt->details($rawReceipt->details);
             }
 
-            $receipts[] = $receipt;
+            $receipts[$id] = $receipt;
         }
 
         return $receipts;
