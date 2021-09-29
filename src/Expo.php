@@ -3,13 +3,15 @@
 namespace Subit\ExpoSdk;
 
 use GuzzleHttp\Client;
-use Subit\ExpoSdk\Exceptions\ExpoApiEndpointException;
-use Subit\ExpoSdk\Exceptions\MissingExponentTokenException;
+use GuzzleHttp\Exception\GuzzleException;
+use Subit\ExpoSdk\Exceptions\ApiTransferException;
 use Subit\ExpoSdk\Exceptions\NoExpoMessageException;
-use Subit\ExpoSdk\Exceptions\NoExpoMessageReceiptException;
-use Subit\ExpoSdk\Exceptions\PushNotificationIdLimitExceededException;
-use Subit\ExpoSdk\Exceptions\PushNotificationLimitExceededException;
 use Subit\ExpoSdk\Exceptions\WrongReceiptIdException;
+use Subit\ExpoSdk\Exceptions\ExpoApiEndpointException;
+use Subit\ExpoSdk\Exceptions\NoExpoMessageReceiptException;
+use Subit\ExpoSdk\Exceptions\MissingExponentTokenException;
+use Subit\ExpoSdk\Exceptions\PushNotificationLimitExceededException;
+use Subit\ExpoSdk\Exceptions\PushNotificationIdLimitExceededException;
 
 class Expo
 {
@@ -33,7 +35,7 @@ class Expo
         return $this->sendPushNotifications([$message])[0];
     }
 
-    public function sendPushNotifications(array $expoMessages) : array
+    public function sendPushNotifications(array $expoMessages): array
     {
         $expoMessageCount = count($expoMessages);
 
@@ -61,21 +63,26 @@ class Expo
         }
 
         $requestBody = json_encode($requestBody);
-        $response = $this->client->request(
-            'POST',
-            'push/send',
-            ['headers' => $this->requestHeaders, 'body' => $requestBody]);
+
+        try {
+            $response = $this->client->request(
+                'POST',
+                'push/send',
+                ['headers' => $this->requestHeaders, 'body' => $requestBody]);
+        } catch (GuzzleException $e) {
+            throw new ApiTransferException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $responseBody = json_decode($response->getBody()->__toString());
 
-        if(property_exists($responseBody, 'errors')) {
+        if (property_exists($responseBody, 'errors')) {
             throw new ExpoApiEndpointException($responseBody->errors);
         }
 
         return $this->buildTickets($responseBody->data, $tickets);
     }
 
-    public function getPushNotificationReceipt($ticketId) : ExpoMessageReceipt
+    public function getPushNotificationReceipt($ticketId): ExpoMessageReceipt
     {
         $receiptInArray = $this->getPushNotificationReceipts([$ticketId]);
 
@@ -88,7 +95,7 @@ class Expo
 
     public function getPushNotificationReceipts(array $ticketIds)
     {
-        if(empty($ticketIds)) {
+        if (empty($ticketIds)) {
             throw new NoExpoMessageReceiptException();
         }
 
@@ -109,19 +116,19 @@ class Expo
 
         $responseBody = json_decode($response->getBody()->__toString());
 
-        if(property_exists($responseBody, 'errors')) {
+        if (property_exists($responseBody, 'errors')) {
             throw new ExpoApiEndpointException($responseBody->errors);
         }
 
         return $this->buildReceipts($responseBody->data);
     }
 
-    public function isValidTokenFormat(string $token) : bool
+    public function isValidTokenFormat(string $token): bool
     {
         return preg_match('/^(ExponentPushToken|ExpoPushToken)\[.*\]$/', $token);
     }
 
-    public function isValidReceiptIdFormat(string $id) : bool
+    public function isValidReceiptIdFormat(string $id): bool
     {
         return preg_match('/^[a-z\d]{8}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{4}-[a-z\d]{12}$/', $id);
     }
@@ -152,7 +159,7 @@ class Expo
         return $tickets;
     }
 
-    private function buildReceipts($rawReceipts) : array
+    private function buildReceipts($rawReceipts): array
     {
         $receipts = [];
 
@@ -178,12 +185,12 @@ class Expo
         return $receipts;
     }
 
-    public function chunkPushNotifications($expoMessages) : array
+    public function chunkPushNotifications($expoMessages): array
     {
         return $this->chunk($expoMessages, self::PUSH_NOTIFICATIONS_CHUNK_LIMIT);
     }
 
-    public function chunkPushNotificationReceiptIds($receiptIds) : array
+    public function chunkPushNotificationReceiptIds($receiptIds): array
     {
         return $this->chunk($receiptIds, self::PUSH_NOTIFICATION_RECEIPT_CHUNK_LIMIT);
     }
