@@ -4,7 +4,7 @@
     "homepage": "https://github.com/subit-io/php-expo-sdk",
     "license": "MIT",
     "require": {
-        "guzzlehttp/guzzle": "^6.3",
+        "guzzlehttp/guzzle": ">=6.3",
       "ext-json": "*"
     },
     "authors": [
